@@ -1,13 +1,23 @@
-// var db = require('../utils/db');
 var mtg = require('../utils/mtgsdk');
+//imports model Card
+const Card = require('../models/card.model.js');
 
-//exports function called `home`
-exports.home = function(req, res){
-  //loads db (defined in db.js helper) then runs callback
-  db.loadDatabase({}, function(){
-    //runs results.render passing in template filename and db data
-     res.render('index', {cards: db.getCollection('cards').data})
-  })
+//exports function called `create`
+exports.create = function(req, res){
+  // Create an instance of model Card
+  var newCard = new Card({ name: 'TestCard' });
+  console.log(newCard);
+
+  // Save the new model instance, passing a callback
+  newCard.save(function (err) {
+    if (err) return handleError(err);
+    // saved!
+  });
+}
+
+exports.read = function(req, res){
+  var results = Card.find({ 'name' : 'TestCard' });
+  console.log(results);
 }
 
 //No longer function. Keeping for reference.
