@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ./partials/head %>
+  </head>
+  <body>
+    <header>
+      <% include ./partials/header %>
+    </header>
+    <div class="container">
+      <div class="jumbotron text-center">
+        <h3>Enter a Card Name</h3>
+        <form action="api/results" style="margin-top: 25px">
+          <input type="text" class="form-control input-lg" placeholder="e.g. Lightning Bolt"  name="q" required>
+        </form>
+      </div>
+    </div>
+
+    <!-- Using cards db data passed into controller -->
+    <% if(cards.length) { %>
+      <h3>Cards</h3>  
+    <% } %>
+    <% cards.forEach(function(card, index) { %>
+      <ul>
+          <li><a href="api/results?q=<%= card.name %>"><%= card.name %></a></li>
+      </ul>
+    <% }) %>
+
+    <footer>
+        <% include ./partials/footer %>
+    </footer>
+  </body>
+</html>
