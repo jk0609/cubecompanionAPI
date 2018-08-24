@@ -1,12 +1,11 @@
 //imports controllers
 var core = require('./controllers/core');
-var api = require('./controllers/api');
 
 module.exports = function(app) {
   //POST
-  app.get('/create', core.create)
+  app.post('/create', core.create);
   //GET
-  app.get('/read', core.read)
-  //API Results
-  app.get('/api/results', api.results)
+  app.get('/read', core.read);
+  //DELETE
+  app.get('/:id/delete', core.delete);
 }

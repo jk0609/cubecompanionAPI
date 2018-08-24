@@ -10,9 +10,6 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', '/public/views'));
 app.use(express.static(path.join(__dirname, '..', '/public/views')));
 
-//routes
-require('./routes.js')(app);
-
 //initialize mongoose and use global Promise library
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -26,8 +23,10 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 //initialize body parser
 const bodyParser = require('body-parser');
-
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+
+//routes
+require('./routes.js')(app);
 
 module.exports = app;

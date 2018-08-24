@@ -1,50 +1,42 @@
-var mtg = require('../utils/mtgsdk');
+var mtg = require('mtgsdk');
 //imports model Card
 const Card = require('../models/card.model.js');
 
 //exports function called `create`
 exports.create = function(req, res){
-  // Create an instance of model Card
-  var newCard = new Card({ name: 'TestCard' });
-  console.log(newCard);
-
-  // Save the new model instance, passing a callback
-  newCard.save(function (err) {
-    if (err) return handleError(err);
-    // saved!
+  //Searchs official mtg api for card name, creates new Card instance based on result
+  mtg.card.where({ name: req.body.name})
+  .then(cards => {
+    //Checks for a valid result
+    if(!cards[0]) {
+      res.send('Card not found');
+    }
+    else {
+      //If found, create a new Card instance with properties from result
+      var newCard = new Card({ 
+        name: cards[0].name,
+        color: cards[0].color, 
+        cmc: cards[0].cmc
+      });
+  
+      // Save the new model instance, passing a callback
+      newCard.save(function (err) {
+        if (err) return handleError(err);
+        res.send('Card added!');
+      });
+    }
   });
 }
 
 exports.read = function(req, res){
-  var results = Card.find({ 'name' : 'TestCard' });
-  console.log(results);
+  Card.find({}, function(err, cards){
+    res.json(cards);
+  });
 }
 
-//No longer function. Keeping for reference.
-
-// exports.top = function(req, res){
-//   db.loadDatabase({}, function(){
-//     res.render('top', {terms: db.getCollection('searches').data})
-//  })
-// }
-
-// // req can capture user input in the req object
-// exports.results = function(req, res){
-//   var query = req.query.q;
-//   //if there is a user query, 
-//   if(query) {
-//     //Adds query into the 'searches' collection in the db, then saves updated db
-//     db.getCollection('searches').insert({term: query});
-//     db.saveDatabase();
-
-//     //Queries mtg api for cards with name == query
-//     mtg.card.where({ name: query })
-//     .then(cards => {
-//         //render the results page using results template, passing in array of card results
-//         console.log(cards);
-//         res.render('results', {query: query, cards: cards});
-//     })
-//   } else {
-//     res.send('Error');
-//   }
-// }
+exports.delete = function(req, res){
+  Card.findByIdAndRemove(req.params.id, function(err){
+    if (err) return next(err);
+    res.send(req.params.id + ' deleted successfully!');
+  });
+} 
