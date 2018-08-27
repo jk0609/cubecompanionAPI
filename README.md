@@ -10,3 +10,8 @@ An API that queries a MongoDB database for Magic the Gathering cards and collect
 * `/read` - Returns a list of Card objects currently stored in the database. Currently returns all cards, will eventually filter by user, card attributes, etc.
 
 * `/:id/delete` - Removes Card with :id from database.
+
+## To Do
+* Add migration or something akin to it for MongoDB
+* Add schema for Cube, where a Cube is a collection of Cards
+* Flesh out Steps to Use w/ Mongo migration and using Postman to send requests
