@@ -8,4 +8,10 @@ module.exports = function(app) {
   app.get('/read', core.read);
   //DELETE
   app.get('/:id/delete', core.delete);
+
+
+  //Populate card list
+  app.get('/populateCards', core.populateCards);
+  //Wipe card list (for testing)
+  app.get('/boardwipe', core.wipeCards);
 }
