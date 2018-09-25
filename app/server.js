@@ -1,5 +1,7 @@
 var express = require('express');
 var path = require('path');
+var db = require('./db');
+require('dotenv').config();
 
 var app = express();
 
@@ -10,16 +12,17 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', '/public/views'));
 app.use(express.static(path.join(__dirname, '..', '/public/views')));
 
-//initialize mongoose and use global Promise library
-const mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
-
-//define path to local db, connect to db on that path
-let dev_db_url = 'mongodb://localhost:27017/cubecompanion';
-let mongoDB = process.env.MONGODB_URI || dev_db_url;
-mongoose.connect(mongoDB, { useNewUrlParser: true });
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+// Connect to MySQL on start
+db.connect(db.MODE_PRODUCTION, function(err) {
+  if (err) {
+    console.log('Unable to connect to MySQL.')
+    process.exit(1)
+  } else {
+    app.listen(3000, function() {
+      console.log('MySQL is listening on port 3000...')
+    })
+  }
+})
 
 //initialize body parser
 const bodyParser = require('body-parser');

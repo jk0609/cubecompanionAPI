@@ -6,9 +6,9 @@ module.exports = function(app) {
   //Read 1 card
   app.get('/cards/:id', cards.getCard)
   //Populate card list
-  app.get('/populateCards', cards.populateCards);
+  app.get('/cards/populate', cards.populate);
   //Wipe card list (for testing)
-  app.get('/boardwipe', cards.wipeCards);
+  // app.get('/cards/boardwipe', cards.wipeCards);
 
 
   //Create 1 cube - Submit from new cube form

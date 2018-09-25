@@ -1,46 +1,62 @@
-//import card model
-const Cube = require('./cube.model.js');
+var mtg = require('mtgsdk');
+var db = require('../db.js')
 
-//import mongoose
-const mongoose = require('mongoose');
+class Card {
+  constructor(name, manaCost, cmc, colors, rarity) {
+    this.name = name;
+    this.manaCost = manaCost;
+    this.cmc = cmc;
+    this.colors = colors;
+    this.rarity = rarity;
+  }
+}
 
-//assign mongoose Schema method to const
-const Schema = mongoose.Schema;
+exports.getCard = function(id) {
 
-//define card Schema (aka model)
-//Includes property validation
-let CardSchema = new Schema({
-  name: {type: String, required: true},
-  manaCost: {type: Array, required: true},
-  cmc: {type: Number, required: true},  
-  colors: {type: Array, required: true}, 
-  rarity: {type: String, required: true},
-  cubes: [{type: Schema.Types.ObjectId, ref: "Cube"}]
-})
+  db.get().query('SELECT * FROM card WHERE id = ?', 1, function(err, result){
+    if (err) console.log(err);
+    var newCardProps = result[0];
+    return new Card(
+      newCardProps['name'],
+      newCardProps['manaCost'],
+      newCardProps['cmc'],
+      newCardProps['colors'],
+      newCardProps['rarity']
+    )
+  })
+}
 
-//exports model
-module.exports = mongoose.model('Card', CardSchema);
+exports.populate = function(done) {
+  mtg.card.where({page: 1, pageSize: 10}) 
+  .then(cards => {
+    cards.forEach(function(card){
+      var newCardProps = [
+        card.name,
+        card.manaCost,
+        card.cmc,
+        card.colors.join(''), 
+        card.rarity,
+        //cubes
+      ]
 
-//Available properties from mtgsdk
-// multiverseid
-// layout
-// names
-// type
-// types
-// subtypes
-// text
-// flavor
-// artist
-// number
-// power
-// toughness
-// reserved
-// rulings
-// printings
-// originalText
-// originalType
-// legalities
-// source
-// imageUrl
-// set
-// id
+      // console.log(newCardProps);
+
+      // db.get().query('INSERT INTO cards(name, manaCost, cmc, colors, rarity) VALUES (?,?,?,?,?)', newCardProps, function(err, result) {
+      //   if (err) return err;
+      //   console.log(result);
+      // })
+      db.get().query('INSERT INTO card(name, manaCost, cmc, colors, rarity) VALUES (?,?,?,?,?)', newCardProps, function(err) {
+        if (err) console.log(err);
+      })
+    });
+
+    console.log('Cards populated!');
+  });
+}
+
+// exports.wipeCards = function(done) {
+//   db.get().query('SELECT * FROM comments', function (err, rows) {
+//     if (err) return done(err)
+//     done(null, rows)
+//   })
+// }
