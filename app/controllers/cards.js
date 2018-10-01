@@ -3,11 +3,17 @@ var mtg = require('mtgsdk');
 //imports model Card
 const cardModel = require('../models/card.model.js');
 
-exports.getCard = function(req, res){
+exports.getCard = async function(req, res){
+  // defines callback to run after async query is finished
+  // returns card data in json form
+  function retrieveFoundCard(card) {
+    console.log(card);
+    res.json(card);
+  }
+
   console.log("Finding card at id "+req.params.id);
-  var foundCard = cardModel.getCard(req.params.id);
-  console.log(foundCard, 'controller');
-  res.json(foundCard);
+  // calls query method defined in model
+  cardModel.getCard(req.params.id, retrieveFoundCard);
 }
 
 exports.populate = function(req, res){

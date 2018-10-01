@@ -1,6 +1,5 @@
 //DB helper file
-var mysql = require('mysql')
-  , async = require('async')
+var mysql = require('mysql');
 
 //Defines db's based on names
 var PRODUCTION_DB = 'cubecompanion'
@@ -31,13 +30,4 @@ exports.connect = function(mode, callback) {
 
 exports.get = function() {
   return state.pool
-}
-
-exports.drop = function(tables, done) {
-  var pool = state.pool
-  if (!pool) return done(new Error('Missing database connection.'))
-
-  async.each(tables, function(name, cb) {
-    pool.query('DELETE * FROM ' + name, cb)
-  }, done)
 }
