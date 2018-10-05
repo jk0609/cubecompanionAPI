@@ -8,12 +8,12 @@ module.exports = function(app) {
   //Populate card list
   app.get('/cards/populate', cards.populate);
 
-
   //Create 1 cube - Submit from new cube form
-  app.post('cube', cubes.createCube);
-
+  app.post('/cubes/new', cubes.createCube);
   //Read 1 cube - List of cards
+  app.get('/cubes/:id', cubes.getCube);
   //Read all cubes - List of cubes, links to read 1 cube
+  app.get('/cubes', cubes.getAllCubes);
   //Update one cube
   //Delete one cube
 

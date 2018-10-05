@@ -11,9 +11,8 @@ class Card {
   }
 }
 
-
-function getCard(id, callback) {
-  db.get().query('SELECT * FROM card WHERE id = ?', id, function(err, result){
+exports.getCard = function(card_id, callback) {
+  db.get().query('SELECT * FROM cards WHERE card_id = ?', card_id, function(err, result){
     if (err) throw err;
     var newCardProps = result[0];
     // creates new Card class instance based on query results
@@ -29,8 +28,6 @@ function getCard(id, callback) {
     callback(newCard);
   });
 }
-
-exports.getCard = getCard;
 
 exports.populate = function(done) {
   mtg.card.where({page: 1, pageSize: 10}) 
