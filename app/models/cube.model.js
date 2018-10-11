@@ -62,14 +62,13 @@ exports.deleteCube = function(cube_id) {
 }
 
 exports.addCards = function(cards, cube_id) {
-  // explode cards string into array of card ids
-  let cardArr = cards.split(",");
-  cardArr.forEach( card => {
-    console.log(card);
-    // loop through ids, batch insert rows into cards2cubes
-  });
+  // explode cards string into array of card ids and convert into 3D array for INSERT arg
+  let cardsToAdd = cards.split(",").map(card_id => 
+    [card_id, cube_id]
+  );
 
-  db.get().query('INSERT INTO cards2cubes(card_id, cube_id) VALUES (?, ?)', addCards, function(err, result) {
+  // need error handling for duplicate entries
+  db.get().query('INSERT INTO cards2cubes(card_id, cube_id) VALUES ?', [cardsToAdd], function(err, result) {
     if (err) throw(err);
   })
 }
