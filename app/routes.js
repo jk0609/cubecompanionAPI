@@ -15,7 +15,11 @@ module.exports = function(app) {
   //Read all cubes - List of cubes, links to read 1 cube
   app.get('/cubes', cubes.getAllCubes);
   //Update one cube
+  app.put('/cubes/:id', cubes.updateCube);
   //Delete one cube
+  app.delete('/cubes/:id', cubes.deleteCube);
+  //Add cards to cube
+  app.post('/cubes/:id/cards', cubes.addCards);
 
   //Create 1 user
   //Read 1 user - User profile view
