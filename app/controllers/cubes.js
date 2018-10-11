@@ -5,9 +5,14 @@ const cubeModel = require('../models/cube.model.js');
 const cardModel = require('../models/card.model.js');
 
 exports.createCube = function(req, res){
-  //Create a cube
-  //Placeholder user, Name and Size can come from request body
-  cubeModel.createCube(1, req.body.name, req.body.size, req.body.cards)
+  let data = [
+    //placeholder user
+    1,
+    req.body.name,
+    req.body.size,
+    req.body.cards
+  ];
+  cubeModel.createCube(data)
   res.send("Cube created!");
 }
 

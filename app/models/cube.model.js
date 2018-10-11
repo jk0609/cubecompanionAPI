@@ -9,15 +9,8 @@ class Cube {
   }
 }
 
-exports.createCube = function(user, name, size, cards) {
+exports.createCube = function(newCubeProps) {
   //query to insert cube row into cube table
-  let newCubeProps = [
-    user,
-    name,
-    size,
-    cards
-  ]
-
   db.get().query('INSERT INTO cubes(user, name, size, cards) VALUES (?,?,?,?)', newCubeProps, function(err) {
     if (err) throw(err);
   })
