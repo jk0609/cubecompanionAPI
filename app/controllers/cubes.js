@@ -1,54 +1,97 @@
 //Cube API functions
+var db = require('../db.js');
 
-//imports model Card
-const cubeModel = require('../models/cube.model.js');
-const cardModel = require('../models/card.model.js');
+class Cube {
+  constructor(user, name, size, cards) {
+    this.user = user;
+    this.name = name;
+    this.size = size;
+    this.cards = cards;
+  }
+}
 
 exports.createCube = function(req, res){
-  let data = [
+  let newCubeProps = [
     //placeholder user
     1,
     req.body.name,
     req.body.size,
     req.body.cards
   ];
-  cubeModel.createCube(data)
-  res.send("Cube created!");
+
+  db.get().query('INSERT INTO cubes(user, name, size, cards) VALUES (?,?,?,?)', newCubeProps, function(err) {
+    if (err) res.send(err);
+    else {
+      res.send("Cube created!");
+    }
+  })
 }
 
 exports.getCube = function(req, res){
-  function retrieveFoundCube(cube) {
-    console.log(cube);
-    res.json(cube);
-  }
-  cubeModel.getCube(req.params.id, retrieveFoundCube);
+  db.get().query('SELECT * FROM cubes WHERE cube_id = ?', req.params.id, function(err, result){
+    if (err) res.send(err);
+    else {
+      var newCubeProps = result[0];
+      // creates new Cube class instance based on query results
+      let newCube = new Cube(
+        newCubeProps['user'],
+        newCubeProps['name'],
+        newCubeProps['size'],
+        //Need to make a call to join table to retrieve cards
+        newCubeProps['cards']
+      )
+
+      res.json(newCube);
+    }
+  });
 }
 
 exports.getAllCubes = function(req, res) {
-  function retrieveAllCubes(cubes) {
-    res.json(cubes);
-  }
-  cubeModel.getAllCubes(retrieveAllCubes);
+  db.get().query('SELECT * FROM cubes', function(err, result){
+    if (err) res.send(err);
+    else {
+      res.json(result);
+    }
+    // returns an array of rows from cubes table
+  });
 }
 
 exports.updateCube = function(req, res) {
-  let data = [
+  let updateCubeProps = [
                 req.body.name,
                 req.body.size,
                 req.body.cards,
                 req.params.id
               ];
-  cubeModel.updateCube(data, retrieveUpdatedCube);
-  res.send("Cube id "+req.params.id+" updated!");
+  db.get().query('UPDATE cubes SET name = ?, size = ?, cards = ? WHERE cube_id = ?', updateCubeProps, function(err, result){
+    if (err) res.send(err);
+    else {
+      res.send("Cube id "+req.params.id+" updated!")
+    }
+  });
 }
 
 exports.deleteCube = function(req, res) {
-  cubeModel.deleteCube(req.params.id);
-  res.send("Cube id "+req.params.id+" deleted!");
+  db.get().query('DELETE FROM cubes WHERE cube_id = ?', req.params.id, function(err, result) {
+    if (err) res.send(err);
+    else {
+      res.send("Cube id "+req.params.id+" deleted!");
+    }
+  })
+  
 }
 
 exports.addCards = function(req, res) {
-  //Cards should be an imploded array
-  cubeModel.addCards(req.body.cards, req.params.id);
-  res.send("Cards added!");
+  // Formatting imploded array into a 3D array for db query arg
+  let cardsToAdd = req.body.cards.split(",").map(card_id => 
+    [card_id, req.params.id]
+  );
+
+  // need error handling for duplicate entries
+  db.get().query('INSERT INTO cards2cubes(card_id, cube_id) VALUES ?', [cardsToAdd], function(err, result) {
+    if (err) res.send(err);
+    else {
+      res.send("Cards added!");
+    }
+  })
 }

@@ -1,24 +1,63 @@
 //Card API functions
 var mtg = require('mtgsdk');
-//imports model Card
-const cardModel = require('../models/card.model.js');
+var db = require('../db.js')
+
+class Card {
+  constructor(name, manaCost, cmc, colors, rarity) {
+    this.name = name;
+    this.manaCost = manaCost;
+    this.cmc = cmc;
+    this.colors = colors;
+    this.rarity = rarity;
+  }
+}
 
 exports.getCard = function(req, res){
-  // defines callback to run after async query is finished
-  // returns card data in json form
-  function retrieveFoundCard(card) {
-    console.log(card);
-    res.json(card);
-  }
+  db.get().query('SELECT * FROM cards WHERE card_id = ?', req.params.id, function(err, result){
+    if (err) res.send(err);
+    else {
+      var newCardProps = result[0];
+      // creates new Card class instance based on query results
+      let foundCard = new Card(
+        newCardProps['name'],
+        newCardProps['manaCost'],
+        newCardProps['cmc'],
+        newCardProps['colors'],
+        newCardProps['rarity']
+      )
 
-  console.log("Finding card at id "+req.params.id);
-  // calls query method defined in model
-  cardModel.getCard(req.params.id, retrieveFoundCard);
+      res.json(foundCard);
+    }
+  });
 }
 
 exports.populate = function(req, res){
   console.log("Retrieving cards...");
-  cardModel.populate();
+  mtg.card.where({page: 1, pageSize: 10}) 
+  .then(cards => {
+    cards.forEach(function(card){
+      var newCardProps = [
+        card.name,
+        card.manaCost,
+        card.cmc,
+        card.colors.join(''), 
+        card.rarity,
+        //cubes
+      ]
+
+      // console.log(newCardProps);
+
+      // db.get().query('INSERT INTO cards(name, manaCost, cmc, colors, rarity) VALUES (?,?,?,?,?)', newCardProps, function(err, result) {
+      //   if (err) return err;
+      //   console.log(result);
+      // })
+      db.get().query('INSERT INTO card(name, manaCost, cmc, colors, rarity) VALUES (?,?,?,?,?)', newCardProps, function(err) {
+        if (err) console.log(err);
+      })
+    });
+
+    console.log('Cards populated!');
+  });
 }
 
 

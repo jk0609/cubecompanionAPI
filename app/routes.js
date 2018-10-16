@@ -7,6 +7,8 @@ module.exports = function(app) {
   app.get('/cards/:id', cards.getCard)
   //Populate card list
   app.get('/cards/populate', cards.populate);
+  //Get cubes associated with card
+  //
 
   //Create 1 cube - Submit from new cube form
   app.post('/cubes/new', cubes.createCube);
@@ -20,6 +22,8 @@ module.exports = function(app) {
   app.delete('/cubes/:id', cubes.deleteCube);
   //Add cards to cube
   app.post('/cubes/:id/cards', cubes.addCards);
+  //Get cards associated with cube
+  //
 
   //Create 1 user
   //Read 1 user - User profile view
