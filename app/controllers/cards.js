@@ -20,7 +20,7 @@ exports.getCard = function(req, res){
       // creates new Card class instance based on query results
       let foundCard = new Card(
         newCardProps['name'],
-        newCardProps['manaCost'],
+        newCardProps['mana_cost'],
         newCardProps['cmc'],
         newCardProps['colors'],
         newCardProps['rarity']
@@ -42,17 +42,10 @@ exports.populate = function(req, res){
         card.cmc,
         card.colors.join(''), 
         card.rarity,
-        //cubes
       ]
 
-      // console.log(newCardProps);
-
-      // db.get().query('INSERT INTO cards(name, manaCost, cmc, colors, rarity) VALUES (?,?,?,?,?)', newCardProps, function(err, result) {
-      //   if (err) return err;
-      //   console.log(result);
-      // })
-      db.get().query('INSERT INTO card(name, manaCost, cmc, colors, rarity) VALUES (?,?,?,?,?)', newCardProps, function(err) {
-        if (err) console.log(err);
+      db.get().query('INSERT INTO card(name, mana_cost, cmc, colors, rarity) VALUES (?,?,?,?,?)', newCardProps, function(err) {
+        if (err) res.send(err);
       })
     });
 

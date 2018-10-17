@@ -81,6 +81,15 @@ exports.deleteCube = function(req, res) {
   
 }
 
+exports.getCards = function(req, res) {
+  // Querys cards2cubes join table for all cards with cube_id = current cube id
+  db.get().query('SELECT cards.card_id, cards.name, cards.mana_cost, cards.cmc, cards.colors, cards.rarity FROM cards INNER JOIN cards2cubes ON cards.card_id = cards2cubes.card_id WHERE cards2cubes.cube_id = ?', req.params.id, function(err, result) {
+    if (err) res.send(err);
+    else {
+      res.json(result);
+    }
+  })
+}
 exports.addCards = function(req, res) {
   // Formatting imploded array into a 3D array for db query arg
   let cardsToAdd = req.body.cards.split(",").map(card_id => 

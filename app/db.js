@@ -5,10 +5,6 @@ var mysql = require('mysql');
 var PRODUCTION_DB = 'cubecompanion'
   , TEST_DB = 'cubecompanion_test'
 
-//Exports db mode options, what the strings are doesn't matter
-exports.MODE_TEST = 'mode_test'
-exports.MODE_PRODUCTION = 'mode_production'
-
 var state = {
   pool: null,
   mode: null,
@@ -21,7 +17,7 @@ exports.connect = function(mode, callback) {
     user: 'root',
     password: process.env.DB_PASS,
     //Chooses prod or test db based on mode passed method
-    database: mode === exports.MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB
+    database: mode === 'MODE_PROD' ? PRODUCTION_DB : TEST_DB
   })
 
   state.mode = mode

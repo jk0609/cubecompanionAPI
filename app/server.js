@@ -13,7 +13,7 @@ app.set('views', path.join(__dirname, '..', '/public/views'));
 app.use(express.static(path.join(__dirname, '..', '/public/views')));
 
 // Connect to MySQL on start
-db.connect(db.MODE_PRODUCTION, function(err) {
+db.connect(process.env.NODE_ENV, function(err) {
   if (err) {
     console.log('Unable to connect to MySQL.')
     process.exit(1)

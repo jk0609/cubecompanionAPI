@@ -20,10 +20,11 @@ module.exports = function(app) {
   app.put('/cubes/:id', cubes.updateCube);
   //Delete one cube
   app.delete('/cubes/:id', cubes.deleteCube);
+  //Get cards associated with cube
+  app.get('/cubes/:id/cards', cubes.getCards);
   //Add cards to cube
   app.post('/cubes/:id/cards', cubes.addCards);
-  //Get cards associated with cube
-  //
+
 
   //Create 1 user
   //Read 1 user - User profile view
