@@ -24,7 +24,7 @@ exports.createCube = function(req, res){
     else {
       res.send("Cube created!");
     }
-  })
+  });
 }
 
 exports.getCube = function(req, res){
@@ -34,13 +34,13 @@ exports.getCube = function(req, res){
       var newCubeProps = result[0];
       // creates new Cube class instance based on query results
       let newCube = new Cube(
+        //needs id?
         newCubeProps['user'],
         newCubeProps['name'],
         newCubeProps['size'],
         //Need to make a call to join table to retrieve cards
         newCubeProps['cards']
       )
-
       res.json(newCube);
     }
   });

@@ -1,14 +1,41 @@
 process.env.NODE_ENV = 'MODE_TEST';
-
+var db = require('../app/db');
 var chai = require("chai");
 var chaiHttp = require('chai-http')
 var server = require('../app/server');
 var should = chai.should(); 
-var db = require('../app/db');
 
 chai.use(chaiHttp);
 
+var testCubeProps = [
+  1,
+  "test_cube_1",
+  540,
+  "1,2,3"
+];
+
 describe("Cubes", function() {
+
+  //populate a test cube
+  beforeEach(function(done) {
+    db.get().query('INSERT INTO cubes(user, name, size, cards) VALUES (?,?,?,?)', testCubeProps, function(err) {
+      if (err) throw err
+      else {
+        done();
+      }
+    });
+  });
+
+  //delete all data from cube table
+  afterEach(function(done) {
+    db.get().query('DELETE FROM cubes', function(err) {
+      if (err) throw err
+      else {
+        done();
+      }
+    })
+  });
+
   it('should list ALL cubes on /cubes GET', function(done) {
     chai.request(server)
       .get('/cubes')
@@ -16,13 +43,71 @@ describe("Cubes", function() {
         res.should.have.status(200);
         res.should.be.json;
         res.body.should.be.a('array');
+        res.body[0].should.have.property('cube_id');
         done();
-      })
+      });
   });
   
-  it('should list a SINGLE cube on /cube/<id> GET');
-  it('should add a SINGLE cube on /cubes POST');
-  it('should update a SINGLE cube on /cube/<id> PUT');
-  it('should delete a SINGLE cube on /cube/<id> DELETE');
+  it('should list a SINGLE cube on /cubes/<id> GET', function(done) {
+    db.get().query('INSERT INTO cubes(user, name, size, cards) VALUES (?,?,?,?)', testCubeProps, function(err, result) {
+      if (err) throw err
+
+      chai.request(server)
+      .get('/cubes/' + result.insertId)
+      .end(function(err, res) {
+        res.should.have.status(200);
+        res.should.be.json;
+        res.body.should.have.property('user');
+        res.body.should.have.property('name');
+        res.body.should.have.property('size');
+        res.body.should.have.property('cards');
+        done();
+      });
+    });
+  });
+
+  it('should add a SINGLE cube on /cubes POST', function(done) {
+    const newCubeProps = {
+      name: "test_cube",
+      size: 360,
+      cards: "1,2,3"
+    };
+
+    chai.request(server)
+      .post(`/cubes/new`)
+      .send(newCubeProps)
+      .end(function(err, res) {
+        res.should.have.status(200);
+        res.text.should.equal('Cube created!');
+        done();
+      });
+  });
+
+  it('should update a SINGLE cube on /cube/<id> PUT', function(done) {
+    chai.request(server)
+    .get('/cubes')
+    .end(function(err, res){
+      chai.request(server)
+        .put('/cubes/' + res.body[0].cube_id)
+        .send({'name': 'test_cube_update'})
+        .end(function(error, response){
+          response.text.should.equal('Cube id ' + res.body[0].cube_id + ' updated!')
+          done();
+      });
+    });
+  });
+
+  it('should delete a SINGLE cube on /cubes/<id> DELETE', function(done) {
+    chai.request(server)
+      .get('/cubes')
+      .end(function(err, res) {
+        chai.request(server)
+          .delete('/cubes/' + res.body[0].cube_id)
+          .end(function(error, response){
+            response.text.should.equal('Cube id ' + res.body[0].cube_id + ' deleted!');
+            done();
+          })
+      });  
+  });
 })
 
