@@ -14,26 +14,25 @@ var testCubeProps = [
   "1,2,3"
 ];
 
-describe("Cubes", function() {
+// Used for GET tests with id
+var testId = 0;
 
-  //populate a test cube
-  beforeEach(function(done) {
-    db.get().query('INSERT INTO cubes(user, name, size, cards) VALUES (?,?,?,?)', testCubeProps, function(err) {
-      if (err) throw err
-      else {
+describe("Cubes", function() {
+  before(function(done) {
+    //populate a test cube
+    db.query('INSERT INTO cubes(user, name, size, cards) VALUES (?,?,?,?)', testCubeProps)
+      .then(function(err, result) {
+        if (err) throw err
+        testId = result.insertId;
         done();
-      }
-    });
+      });
   });
 
-  //delete all data from cube table
-  afterEach(function(done) {
-    db.get().query('DELETE FROM cubes', function(err) {
-      if (err) throw err
-      else {
-        done();
-      }
-    })
+  // delete all data from tables
+  after(function(done) {
+    db.query('DELETE FROM cubes')
+    .then(db.query('DELETE FROM cards'))
+    .then(db.query('DELETE FROM cards2cubes'));
   });
 
   it('should list ALL cubes on /cubes GET', function(done) {
@@ -49,35 +48,29 @@ describe("Cubes", function() {
   });
   
   it('should list a SINGLE cube on /cubes/<id> GET', function(done) {
-    db.get().query('INSERT INTO cubes(user, name, size, cards) VALUES (?,?,?,?)', testCubeProps, function(err, result) {
-      if (err) throw err
-
-      chai.request(server)
-      .get('/cubes/' + result.insertId)
-      .end(function(err, res) {
-        res.should.have.status(200);
-        res.should.be.json;
-        res.body.should.have.property('user');
-        res.body.should.have.property('name');
-        res.body.should.have.property('size');
-        res.body.should.have.property('cards');
-        done();
-      });
+    chai.request(server)
+    .get('/cubes/' + testId)
+    .end(function(err, res) {
+      res.should.have.status(200);
+      res.should.be.json;
+      res.body.should.have.property('user');
+      res.body.should.have.property('name');
+      res.body.should.have.property('size');
+      res.body.should.have.property('cards');
+      done();
     });
   });
 
   it('should add a SINGLE cube on /cubes POST', function(done) {
     const newCubeProps = {
       name: "test_cube",
-      size: 360,
-      cards: "1,2,3"
+      size: 360
     };
 
     chai.request(server)
       .post(`/cubes/new`)
       .send(newCubeProps)
       .end(function(err, res) {
-        res.should.have.status(200);
         res.text.should.equal('Cube created!');
         done();
       });
@@ -85,28 +78,62 @@ describe("Cubes", function() {
 
   it('should update a SINGLE cube on /cube/<id> PUT', function(done) {
     chai.request(server)
-    .get('/cubes')
-    .end(function(err, res){
-      chai.request(server)
-        .put('/cubes/' + res.body[0].cube_id)
-        .send({'name': 'test_cube_update'})
-        .end(function(error, response){
-          response.text.should.equal('Cube id ' + res.body[0].cube_id + ' updated!')
-          done();
-      });
+      .put('/cubes/' + testId)
+      .send({'name': 'test_cube_update'})
+      .end(function(err, res){
+        res.text.should.equal('Cube id ' + testId + ' updated!')
+        done();
     });
   });
 
   it('should delete a SINGLE cube on /cubes/<id> DELETE', function(done) {
     chai.request(server)
-      .get('/cubes')
+      .delete('/cubes/' + testId)
+      .end(function(err, res){
+        res.text.should.equal('Cube id ' + testId + ' deleted!');
+        done();
+      });
+  });
+
+  it('should associate cards with a SINGLE cube on /cubes/<id>/cards POST', function(done) {
+    //populate 3 test cards
+    var testCardIds = [];
+    for(i=0;i<4;i++) {
+      var newCardProps = [
+        'test_card_name_'+i,
+        '{W}{B}',
+        2,
+        'White,Black', 
+        'Rare',
+      ]
+
+      db.query('INSERT INTO cards(name, mana_cost, cmc, colors, rarity) VALUES (?,?,?,?,?)', newCardProps)
+        .then(function(err, result) {
+          if (err) throw err;
+          testCardIds.push(result.insertId);
+        });
+    };
+    //async issue with added cards to DB.
+    chai.request(server)
+      .post('/cubes/'+testId+'/cards')
+      .send({'cards': testCardIds.join(',')})
       .end(function(err, res) {
-        chai.request(server)
-          .delete('/cubes/' + res.body[0].cube_id)
-          .end(function(error, response){
-            response.text.should.equal('Cube id ' + res.body[0].cube_id + ' deleted!');
-            done();
-          })
+        res.text.should.equal('Cards added!');
+        done();
+      });  
+  });
+  
+  it('should list all cards associated with a SINGLE cube on /cubes/<id>/cards GET', function(done) {
+    chai.request(server)
+      .get('/cubes/'+testId+'/cards')
+      .end(function(err, res) {
+        res.should.be.json;
+        res.body[0].should.have.property('name');
+        res.body[0].should.have.property('mana_cost');
+        res.body[0].should.have.property('cmc');
+        res.body[0].should.have.property('colors');
+        res.body[0].should.have.property('rarity');
+        done();
       });  
   });
 })

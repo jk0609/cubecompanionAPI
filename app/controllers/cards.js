@@ -3,9 +3,9 @@ var mtg = require('mtgsdk');
 var db = require('../db.js')
 
 class Card {
-  constructor(name, manaCost, cmc, colors, rarity) {
+  constructor(name, mana_cost, cmc, colors, rarity) {
     this.name = name;
-    this.manaCost = manaCost;
+    this.mana_cost = mana_cost;
     this.cmc = cmc;
     this.colors = colors;
     this.rarity = rarity;
@@ -13,22 +13,23 @@ class Card {
 }
 
 exports.getCard = function(req, res){
-  db.get().query('SELECT * FROM cards WHERE card_id = ?', req.params.id, function(err, result){
-    if (err) res.send(err);
-    else {
-      var newCardProps = result[0];
-      // creates new Card class instance based on query results
-      let foundCard = new Card(
-        newCardProps['name'],
-        newCardProps['mana_cost'],
-        newCardProps['cmc'],
-        newCardProps['colors'],
-        newCardProps['rarity']
-      )
-
-      res.json(foundCard);
-    }
-  });
+  db.query('SELECT * FROM cards WHERE card_id = ?', req.params.id)
+    .then(function(err, result){
+      if (err) res.send(err);
+      else {
+        var newCardProps = result[0];
+        // creates new Card class instance based on query results
+        let foundCard = new Card(
+          newCardProps['name'],
+          newCardProps['mana_cost'],
+          newCardProps['cmc'],
+          newCardProps['colors'],
+          newCardProps['rarity']
+        )
+  
+        res.json(foundCard);
+      }
+    });
 }
 
 exports.populate = function(req, res){
@@ -44,9 +45,10 @@ exports.populate = function(req, res){
         card.rarity,
       ]
 
-      db.get().query('INSERT INTO card(name, mana_cost, cmc, colors, rarity) VALUES (?,?,?,?,?)', newCardProps, function(err) {
-        if (err) res.send(err);
-      })
+      db.query('INSERT INTO card(name, mana_cost, cmc, colors, rarity) VALUES (?,?,?,?,?)', newCardProps)
+        .then(function(err) {
+          if (err) res.send(err);
+        });
     });
 
     console.log('Cards populated!');

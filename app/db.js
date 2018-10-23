@@ -27,3 +27,23 @@ exports.connect = function(mode, callback) {
 exports.get = function() {
   return state.pool
 }
+
+exports.query = function(sql, args) {
+  return new Promise(function(resolve, reject) {
+    // Passing in SQL query, args and anonymous callback
+    state.pool.query(sql, args, function(err, rows) {
+      if (err) return reject(err);
+      resolve(rows);
+    });
+  });
+}
+
+exports.close = function() {
+  return new Promise(function(resolve, reject) {
+      state.pool.end( err => {
+          if (err)
+              return reject( err );
+          resolve();
+      } );
+  } );
+}
