@@ -41,8 +41,7 @@ exports.query = function(sql, args) {
 exports.close = function() {
   return new Promise(function(resolve, reject) {
       state.pool.end( err => {
-          if (err)
-              return reject( err );
+          if (err) return reject( err );
           resolve();
       } );
   } );

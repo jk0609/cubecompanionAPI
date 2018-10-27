@@ -5,7 +5,7 @@ require('dotenv').config();
 
 var app = express();
 
-//intialize view engine, aka template code
+//intialize view engine
 app.set('view engine', 'ejs');
 
 //establish public folders
