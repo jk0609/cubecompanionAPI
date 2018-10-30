@@ -14,21 +14,21 @@ class Card {
 
 exports.getCard = function(req, res){
   db.query('SELECT * FROM cards WHERE card_id = ?', req.params.id)
-    .then(function(err, result){
-      if (err) res.send(err);
-      else {
-        var newCardProps = result[0];
-        // creates new Card class instance based on query results
-        let foundCard = new Card(
-          newCardProps['name'],
-          newCardProps['mana_cost'],
-          newCardProps['cmc'],
-          newCardProps['colors'],
-          newCardProps['rarity']
-        )
-  
-        res.json(foundCard);
-      }
+    .then((result) => {
+      var newCardProps = result[0];
+      // creates new Card class instance based on query results
+      let foundCard = new Card(
+        newCardProps['name'],
+        newCardProps['mana_cost'],
+        newCardProps['cmc'],
+        newCardProps['colors'],
+        newCardProps['rarity']
+      )
+
+      res.json(foundCard);
+    })
+    .catch( err => {
+      res.send(err);
     });
 }
 
@@ -46,8 +46,8 @@ exports.populate = function(req, res){
       ]
 
       db.query('INSERT INTO card(name, mana_cost, cmc, colors, rarity) VALUES (?,?,?,?,?)', newCardProps)
-        .then(function(err) {
-          if (err) res.send(err);
+        .catch( err => {
+          res.send(err);
         });
     });
 
