@@ -2,9 +2,10 @@ process.env.NODE_ENV = 'MODE_TEST';
 var db = require('../app/db');
 var chai = require('chai');
 var chaiHttp = require('chai-http')
-var server = require('../app/server');
+var app = require('../app/app');
 var should = chai.should(); 
 
+// chai-http requests open and close servers automatically, no need to do so in before/after hooks
 chai.use(chaiHttp);
 
 // Used for GET tests with id
@@ -33,7 +34,7 @@ describe('Cubes', function() {
   });
 
   it('should list a SINGLE cube on /cubes/<id> GET', async() => {
-    let res = await chai.request(server).get('/cubes/' + testId);
+    let res = await chai.request(app).get('/cubes/' + testId);
     res.should.have.status(200);
     res.should.be.json;
     res.body.should.have.property('user');
@@ -44,7 +45,7 @@ describe('Cubes', function() {
 
   it('should list ALL cubes on /cubes GET', async() => {
     // Instead of calling 'done', just return the Promise directly or await the response
-    let res = await chai.request(server).get('/cubes');
+    let res = await chai.request(app).get('/cubes');
     res.should.have.status(200);
     res.should.be.json;
     res.body.should.be.a('array');
@@ -58,29 +59,29 @@ describe('Cubes', function() {
       size: 360
     };
 
-    let res = await chai.request(server).post(`/cubes/new`).send(newCubeProps);
+    let res = await chai.request(app).post(`/cubes/new`).send(newCubeProps);
     res.statusCode.should.equal(200);
     res.text.should.equal('Cube created!');
   });
 
   it('should update a SINGLE cube on /cube/<id> PUT', async() => {
-    let res = await chai.request(server).put('/cubes/'+testId).send({'name': 'test_cube_update'});
+    let res = await chai.request(app).put('/cubes/'+testId).send({'name': 'test_cube_update'});
     res.statusCode.should.equal(200);
     res.text.should.equal('Cube id '+testId+' updated!');
   });
 
   it('should delete a SINGLE cube on /cubes/<id> DELETE', async() => {
-    let res = await chai.request(server).delete('/cubes/' + testId);
+    let res = await chai.request(app).delete('/cubes/' + testId);
     res.text.should.equal('Cube id '+testId+' deleted!');
   });
 
   it('should associate cards with a SINGLE cube on /cubes/<id>/cards POST', async() => {
-    let res = await chai.request(server).post('/cubes/'+testId+'/cards').set('content-type', 'application/x-www-form-urlencoded').send({'cards': testCardId});
+    let res = await chai.request(app).post('/cubes/'+testId+'/cards').set('content-type', 'application/x-www-form-urlencoded').send({'cards': testCardId});
     res.text.should.equal('Cards added!');
   });
   
   it('should list all cards associated with a SINGLE cube on /cubes/<id>/cards GET', async() => {
-    let res = await chai.request(server).get('/cubes/'+testId+'/cards');
+    let res = await chai.request(app).get('/cubes/'+testId+'/cards');
     res.should.be.json;
     res.body[0].should.have.property('name');
     res.body[0].should.have.property('mana_cost');

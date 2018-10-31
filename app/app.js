@@ -18,17 +18,7 @@ db.connect(process.env.NODE_ENV, function(err) {
     console.log('Unable to connect to MySQL.');
     process.exit(1);
   } 
-  else if (process.env.NODE_ENV == 'MODE_TEST') {
-    app.listen(3001, function() {
-      console.log('MySQL is listening on port 3001...');
-    });   
-  }
-  else {
-    app.listen(3000, function() {
-      console.log('MySQL is listening on port 3000...');
-    });
-  }
-})
+});
 
 //initialize body parser
 const bodyParser = require('body-parser');
@@ -36,6 +26,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 //routes
-require('./routes.js')(app);
+require('./routes')(app);
 
+// Exporting app config and calling listen elsewhere prevents port collision for watched tests
 module.exports = app;
